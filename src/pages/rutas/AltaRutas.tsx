@@ -19,7 +19,16 @@ import {
   AlertDialogOverlay,
   Text,
   Spinner,
-  Center
+  Center,
+  Container,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Divider,
+  Icon,
+  useColorModeValue,
+  Flex
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { ciudadesApi, empleadosApi, rutasApi } from '../../services/api'
@@ -60,6 +69,11 @@ export const AltaRutas = () => {
   const tipoRef = useRef<HTMLSelectElement>(null)
   const choferRef = useRef<HTMLSelectElement>(null)
   const capacidadRef = useRef<HTMLInputElement>(null)
+  
+  // Color mode values
+  const cardBg = useColorModeValue('white', 'gray.700')
+  const headerBg = useColorModeValue('blue.50', 'blue.900')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
   
   const toast = useToast()
   const navigate = useNavigate()
@@ -224,6 +238,7 @@ export const AltaRutas = () => {
           status: 'success',
           duration: 3000,
           isClosable: true,
+          position: 'top',
         })
         
         // Limpiar formulario
@@ -235,6 +250,7 @@ export const AltaRutas = () => {
           status: 'error',
           duration: 5000,
           isClosable: true,
+          position: 'top',
         })
       }
     }
@@ -290,14 +306,22 @@ export const AltaRutas = () => {
   // Mostrar pantalla de carga
   if (loading) {
     return (
-      <Box p={8} maxWidth="600px" mx="auto">
-        <Heading mb={6}>Alta de Rutas</Heading>
-        <Center py={10}>
-          <VStack>
-            <Spinner size="xl" />
-            <Text mt={4}>Cargando datos...</Text>
-          </VStack>
-        </Center>
+      <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="center" justifyContent="center" bg="gray.50" overflowY="auto">
+        <Box py={8}>
+          <Card w={["95%", "90%", "450px"]} maxW="500px" boxShadow="xl" borderRadius="lg" mx="auto">
+            <CardHeader bg={headerBg} borderTopRadius="lg">
+              <Heading size="lg" textAlign="center">Alta de Rutas</Heading>
+            </CardHeader>
+            <CardBody>
+              <Center py={10}>
+                <VStack>
+                  <Spinner size="xl" thickness="4px" speed="0.65s" color="blue.500" />
+                  <Text mt={4} fontSize="lg">Cargando datos...</Text>
+                </VStack>
+              </Center>
+            </CardBody>
+          </Card>
+        </Box>
       </Box>
     )
   }
@@ -305,156 +329,252 @@ export const AltaRutas = () => {
   // Mostrar mensaje de error
   if (error) {
     return (
-      <Box p={8} maxWidth="600px" mx="auto">
-        <Heading mb={6}>Alta de Rutas</Heading>
-        <Center py={10}>
-          <VStack>
-            <Text color="red.500">{error}</Text>
-            <Button mt={4} onClick={() => window.location.reload()}>
-              Reintentar
-            </Button>
-          </VStack>
-        </Center>
+      <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="center" justifyContent="center" bg="gray.50" overflowY="auto">
+        <Box py={8}>
+          <Card w={["95%", "90%", "450px"]} maxW="500px" boxShadow="xl" borderRadius="lg" mx="auto">
+            <CardHeader bg={headerBg} borderTopRadius="lg">
+              <Heading size="lg" textAlign="center">Alta de Rutas</Heading>
+            </CardHeader>
+            <CardBody>
+              <Center py={10}>
+                <VStack>
+                  <Icon viewBox="0 0 24 24" boxSize={12} color="red.500">
+                    <path
+                      fill="currentColor"
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                    />
+                  </Icon>
+                  <Text color="red.500" fontSize="lg" fontWeight="medium" mt={2}>{error}</Text>
+                  <Button mt={6} colorScheme="blue" onClick={() => window.location.reload()}>
+                    Reintentar
+                  </Button>
+                </VStack>
+              </Center>
+            </CardBody>
+          </Card>
+        </Box>
       </Box>
     )
   }
   
   return (
-    <Box p={8} maxWidth="600px" mx="auto">
-      <Heading mb={6}>Alta de Rutas</Heading>
-      
-      <VStack spacing={4} align="stretch">
-        {formError && (
-          <Text color="red.500" fontWeight="bold">{formError}</Text>
-        )}
-        
-        <FormControl isRequired>
-          <FormLabel>Ciudad</FormLabel>
-          <Select 
-            placeholder="Seleccione"
-            value={ciudad}
-            onChange={handleCiudadChange}
-            ref={ciudadRef}
-          >
-            {ciudades.map(c => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </Select>
-        </FormControl>
-        
-        <FormControl isRequired isInvalid={!!nombreRutaError}>
-          <FormLabel>Nombre de la Ruta</FormLabel>
-          <Input 
-            value={nombreRuta}
-            onChange={handleNombreRutaChange}
-            maxLength={15}
-            ref={nombreRutaRef}
-          />
-          {nombreRutaError && (
-            <FormErrorMessage>{nombreRutaError}</FormErrorMessage>
-          )}
-        </FormControl>
-        
-        <FormControl isRequired>
-          <FormLabel>Tipo</FormLabel>
-          <Select 
-            placeholder="Seleccione"
-            value={tipo}
-            onChange={handleTipoChange}
-            ref={tipoRef}
-          >
-            {tiposServicio.map(t => (
-              <option key={t.id} value={t.id}>{t.id === 'Personal' ? '1' : '2'} - {t.nombre}</option>
-            ))}
-          </Select>
-        </FormControl>
-        
-        <FormControl isRequired>
-          <FormLabel>Chófer</FormLabel>
-          <Select 
-            placeholder="Seleccione"
-            value={chofer}
-            onChange={(e) => setChofer(e.target.value)}
-            ref={choferRef}
-            isDisabled={!ciudad}
-          >
-            {choferes.length > 0 ? (
-              choferes.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre} {c.apellido_paterno} {c.apellido_materno}
-                </option>
-              ))
-            ) : (
-              <option disabled value="">
-                No hay chóferes disponibles en esta ciudad
-              </option>
-            )}
-          </Select>
-          {ciudad && choferes.length === 0 && (
-            <Text color="orange.500" fontSize="sm" mt={1}>
-              No hay chóferes disponibles para la ciudad seleccionada
-            </Text>
-          )}
-        </FormControl>
-        
-        <FormControl isRequired isInvalid={!!capacidadError}>
-          <FormLabel>Capacidad</FormLabel>
-          <Input 
-            value={capacidad}
-            onChange={handleCapacidadChange}
-            type="number"
-            ref={capacidadRef}
-            isDisabled={!tipo}
-          />
-          {capacidadError && (
-            <FormErrorMessage>{capacidadError}</FormErrorMessage>
-          )}
-          {tipo && (
-            <Text fontSize="sm" color="gray.600" mt={1}>
-              Capacidad máxima: {getCapacidadMaxima()}
-            </Text>
-          )}
-        </FormControl>
-        
-        <HStack spacing={4} pt={4} justifyContent="flex-end">
-          <Button 
-            colorScheme="green" 
-            onClick={handleAceptar}
-            leftIcon={<span role="img" aria-label="check">✓</span>}
-          >
-            Aceptar
-          </Button>
-          <Button 
-            colorScheme="red" 
-            onClick={handleSalir}
-            leftIcon={<span role="img" aria-label="exit">✖</span>}
-          >
-            Salir
-          </Button>
-        </HStack>
-      </VStack>
+    <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="center" justifyContent="center" bg="gray.50" overflowY="auto">
+      <Box py={8} w="100%" display="flex" justifyContent="center">
+        <Card 
+          w={["95%", "90%", "450px"]} 
+          maxW="500px" 
+          boxShadow="2xl" 
+          borderRadius="lg" 
+          bg={cardBg} 
+          mx="auto"
+          overflow="hidden"
+        >
+          <CardHeader bg={headerBg} borderTopRadius="lg" pb={4} textAlign="center">
+            <Heading size={["md", "lg"]} textAlign="center">Alta de Rutas</Heading>
+          </CardHeader>
+          
+          <CardBody pt={6} px={[4, 5, 6]}>
+            <VStack spacing={5} align="stretch">
+              {formError && (
+                <Box 
+                  p={3} 
+                  bg="red.50" 
+                  color="red.600" 
+                  borderRadius="md" 
+                  borderLeft="4px" 
+                  borderColor="red.500"
+                >
+                  <Text fontWeight="medium">{formError}</Text>
+                </Box>
+              )}
+              
+              <FormControl isRequired>
+                <FormLabel fontWeight="medium">Ciudad</FormLabel>
+                <Select 
+                  placeholder="Seleccione una ciudad"
+                  value={ciudad}
+                  onChange={handleCiudadChange}
+                  ref={ciudadRef}
+                  bg="white"
+                  borderColor={borderColor}
+                  _hover={{ borderColor: 'blue.300' }}
+                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                  h={["40px", "45px"]}
+                  fontSize={["sm", "md"]}
+                >
+                  {ciudades.map(c => (
+                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <FormControl isRequired isInvalid={!!nombreRutaError}>
+                <FormLabel fontWeight="medium">Nombre de la Ruta</FormLabel>
+                <Input 
+                  value={nombreRuta}
+                  onChange={handleNombreRutaChange}
+                  maxLength={15}
+                  ref={nombreRutaRef}
+                  bg="white"
+                  borderColor={borderColor}
+                  _hover={{ borderColor: 'blue.300' }}
+                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                  h={["40px", "45px"]}
+                  fontSize={["sm", "md"]}
+                  placeholder="Ingrese nombre de ruta"
+                />
+                {nombreRutaError && (
+                  <FormErrorMessage>{nombreRutaError}</FormErrorMessage>
+                )}
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel fontWeight="medium">Tipo</FormLabel>
+                <Select 
+                  placeholder="Seleccione un tipo"
+                  value={tipo}
+                  onChange={handleTipoChange}
+                  ref={tipoRef}
+                  bg="white"
+                  borderColor={borderColor}
+                  _hover={{ borderColor: 'blue.300' }}
+                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                  h={["40px", "45px"]}
+                  fontSize={["sm", "md"]}
+                >
+                  {tiposServicio.map(t => (
+                    <option key={t.id} value={t.id}>{t.id === 'Personal' ? '1' : '2'} - {t.nombre}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <FormControl isRequired>
+                <FormLabel fontWeight="medium">Chófer</FormLabel>
+                <Select 
+                  placeholder="Seleccione un chófer"
+                  value={chofer}
+                  onChange={(e) => setChofer(e.target.value)}
+                  ref={choferRef}
+                  isDisabled={!ciudad}
+                  bg="white"
+                  borderColor={borderColor}
+                  _hover={{ borderColor: 'blue.300' }}
+                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                  h={["40px", "45px"]}
+                  fontSize={["sm", "md"]}
+                  opacity={!ciudad ? 0.6 : 1}
+                >
+                  {choferes.length > 0 ? (
+                    choferes.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.nombre} {c.apellido_paterno} {c.apellido_materno}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled value="">
+                      No hay chóferes disponibles en esta ciudad
+                    </option>
+                  )}
+                </Select>
+                {ciudad && choferes.length === 0 && (
+                  <Text color="orange.500" fontSize="sm" mt={1} fontStyle="italic">
+                    No hay chóferes disponibles para la ciudad seleccionada
+                  </Text>
+                )}
+              </FormControl>
+              
+              <FormControl isRequired isInvalid={!!capacidadError}>
+                <FormLabel fontWeight="medium">Capacidad</FormLabel>
+                <Input 
+                  value={capacidad}
+                  onChange={handleCapacidadChange}
+                  type="number"
+                  ref={capacidadRef}
+                  isDisabled={!tipo}
+                  bg="white"
+                  borderColor={borderColor}
+                  _hover={{ borderColor: 'blue.300' }}
+                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                  h={["40px", "45px"]}
+                  fontSize={["sm", "md"]}
+                  placeholder="Ingrese capacidad"
+                  opacity={!tipo ? 0.6 : 1}
+                />
+                {capacidadError && (
+                  <FormErrorMessage>{capacidadError}</FormErrorMessage>
+                )}
+                {tipo && (
+                  <Text fontSize="sm" color="blue.600" mt={1}>
+                    Capacidad máxima: {getCapacidadMaxima()}
+                  </Text>
+                )}
+              </FormControl>
+            </VStack>
+          </CardBody>
+          
+          <Divider borderColor={borderColor} />
+          
+          <CardFooter pt={4} px={[4, 5, 6]} pb={4}>
+            <HStack spacing={4} width="100%" justifyContent="center">
+              <Button 
+                colorScheme="green" 
+                onClick={handleAceptar}
+                leftIcon={<span role="img" aria-label="check">✓</span>}
+                size={["md", "md"]}
+                px={[4, 5, 6]}
+                _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
+                transition="all 0.2s"
+                flexGrow={1}
+                maxW="160px"
+              >
+                Aceptar
+              </Button>
+              <Button 
+                colorScheme="red" 
+                onClick={handleSalir}
+                leftIcon={<span role="img" aria-label="exit">✖</span>}
+                size={["md", "md"]}
+                px={[4, 5, 6]}
+                variant="outline"
+                _hover={{ transform: 'translateY(-2px)', boxShadow: 'sm' }}
+                transition="all 0.2s"
+                flexGrow={1}
+                maxW="160px"
+              >
+                Salir
+              </Button>
+            </HStack>
+          </CardFooter>
+        </Card>
+      </Box>
       
       {/* Diálogo de confirmación de salida */}
       <AlertDialog
         isOpen={isExitDialogOpen}
         leastDestructiveRef={cancelRef}
         onClose={handleCancelExit}
+        isCentered
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+          <AlertDialogContent borderRadius="md" boxShadow="xl" mx={4}>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px">
               Confirmar salida
             </AlertDialogHeader>
 
-            <AlertDialogBody>
+            <AlertDialogBody py={4}>
               ¿Está seguro que desea salir? Los datos no guardados se perderán.
             </AlertDialogBody>
 
             <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={handleCancelExit}>
+              <Button ref={cancelRef} onClick={handleCancelExit} size="md">
                 Cancelar
               </Button>
-              <Button colorScheme="red" onClick={handleConfirmExit} ml={3}>
+              <Button 
+                colorScheme="red" 
+                onClick={handleConfirmExit} 
+                ml={3}
+                size="md"
+              >
                 Salir
               </Button>
             </AlertDialogFooter>
