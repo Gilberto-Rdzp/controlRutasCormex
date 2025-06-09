@@ -43,9 +43,10 @@ import {
   useColorModeValue,
   InputGroup,
   InputLeftElement,
-  Badge
+  Badge,
+  Icon
 } from '@chakra-ui/react'
-import { EditIcon, DeleteIcon, CloseIcon, SearchIcon } from '@chakra-ui/icons'
+import { EditIcon, DeleteIcon, CloseIcon, SearchIcon, RepeatIcon } from '@chakra-ui/icons'
 import { rutasApi, ciudadesApi, empleadosApi } from '../../services/api'
 import type { Ruta, Ciudad, Empleado } from '../../services/api'
 
@@ -89,6 +90,9 @@ export const BusquedaRutas = () => {
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const tableBg = useColorModeValue('white', 'gray.800')
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
+  const errorBg = useColorModeValue('red.50', 'red.900')
+  const errorBorderColor = useColorModeValue('red.500', 'red.600')
+  const errorTextColor = useColorModeValue('red.600', 'red.200')
   
   const toast = useToast()
   
@@ -99,45 +103,47 @@ export const BusquedaRutas = () => {
   ]
   
   // Cargar ciudades al montar el componente
-  useEffect(() => {
-    const fetchCiudades = async () => {
-      setLoading(true)
-      try {
-        const ciudadesData = await ciudadesApi.getAll()
-        setCiudades(ciudadesData)
-        setError(null)
-      } catch (err) {
-        console.error('Error al cargar ciudades:', err)
-        setError('Error al cargar ciudades. Por favor, intente nuevamente.')
-      } finally {
-        setLoading(false)
-      }
+  const fetchCiudades = async () => {
+    setLoading(true)
+    try {
+      const ciudadesData = await ciudadesApi.getAll()
+      setCiudades(ciudadesData)
+      setError(null)
+    } catch (err) {
+      console.error('Error al cargar ciudades:', err)
+      setError('No se pudieron cargar los datos de ciudades. Verifique su conexión e intente nuevamente.')
+    } finally {
+      setLoading(false)
     }
-    
+  }
+  
+  useEffect(() => {
     fetchCiudades()
   }, [])
   
   // Cargar rutas cuando cambia la ciudad seleccionada
+  const fetchRutas = async (idCiudad: string) => {
+    if (!idCiudad) return
+    
+    setLoading(true)
+    try {
+      const rutasData = await rutasApi.getRutasPorCiudad(parseInt(idCiudad))
+      setRutas(rutasData)
+      setRutasFiltradas(rutasData)
+      setError(null)
+    } catch (err) {
+      console.error('Error al cargar rutas:', err)
+      setError('No se pudieron cargar las rutas para la ciudad seleccionada. Verifique su conexión e intente nuevamente.')
+      setRutas([])
+      setRutasFiltradas([])
+    } finally {
+      setLoading(false)
+    }
+  }
+  
   useEffect(() => {
     if (ciudadSeleccionada) {
-      const fetchRutas = async () => {
-        setLoading(true)
-        try {
-          const rutasData = await rutasApi.getRutasPorCiudad(parseInt(ciudadSeleccionada))
-          setRutas(rutasData)
-          setRutasFiltradas(rutasData)
-          setError(null)
-        } catch (err) {
-          console.error('Error al cargar rutas:', err)
-          setError('Error al cargar rutas. Por favor, intente nuevamente.')
-          setRutas([])
-          setRutasFiltradas([])
-        } finally {
-          setLoading(false)
-        }
-      }
-      
-      fetchRutas()
+      fetchRutas(ciudadSeleccionada)
     } else {
       setRutas([])
       setRutasFiltradas([])
@@ -436,15 +442,32 @@ export const BusquedaRutas = () => {
             
             {error && (
               <Box 
-                p={4} 
-                bg="red.50" 
-                color="red.600" 
+                p={5} 
+                bg={errorBg} 
+                color={errorTextColor} 
                 borderRadius="md" 
                 mb={6}
                 borderLeft="4px" 
-                borderColor="red.500"
+                borderColor={errorBorderColor}
               >
-                <Text fontWeight="medium">{error}</Text>
+                <Flex direction="column" align="center" justify="center">
+                  <Icon as={CloseIcon} boxSize={10} mb={3} />
+                  <Text fontWeight="bold" fontSize="lg" mb={1} textAlign="center">
+                    Error de conexión
+                  </Text>
+                  <Text textAlign="center" mb={4}>{error}</Text>
+                  <Button 
+                    colorScheme="blue" 
+                    onClick={() => window.location.reload()}
+                    leftIcon={<RepeatIcon />}
+                    size="md"
+                    px={6}
+                    _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
+                    transition="all 0.2s"
+                  >
+                    Reintentar
+                  </Button>
+                </Flex>
               </Box>
             )}
             
