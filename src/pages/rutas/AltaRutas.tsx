@@ -20,15 +20,13 @@ import {
   Text,
   Spinner,
   Center,
-  Container,
   Card,
   CardHeader,
   CardBody,
   CardFooter,
   Divider,
   Icon,
-  useColorModeValue,
-  Flex
+  useColorModeValue
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { ciudadesApi, empleadosApi, rutasApi } from '../../services/api'
