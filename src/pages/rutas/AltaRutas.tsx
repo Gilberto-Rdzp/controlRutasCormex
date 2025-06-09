@@ -26,11 +26,13 @@ import {
   CardFooter,
   Divider,
   Icon,
-  useColorModeValue
+  useColorModeValue,
+  Flex
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { ciudadesApi, empleadosApi, rutasApi } from '../../services/api'
 import type { Ciudad, Empleado } from '../../services/api'
+import { CloseIcon, RepeatIcon } from '@chakra-ui/icons'
 
 export const AltaRutas = () => {
   // Estados para los campos del formulario
@@ -72,6 +74,9 @@ export const AltaRutas = () => {
   const cardBg = useColorModeValue('white', 'gray.700')
   const headerBg = useColorModeValue('blue.50', 'blue.900')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const errorBg = useColorModeValue('red.50', 'red.900')
+  const errorBorderColor = useColorModeValue('red.500', 'red.600')
+  const errorTextColor = useColorModeValue('red.600', 'red.200')
   
   const toast = useToast()
   const navigate = useNavigate()
@@ -86,7 +91,7 @@ export const AltaRutas = () => {
         setError(null)
       } catch (err) {
         console.error('Error al cargar ciudades:', err)
-        setError('Error al cargar datos. Por favor, intente nuevamente.')
+        setError('No se pudieron cargar los datos de ciudades. Verifique su conexión e intente nuevamente.')
       } finally {
         setLoading(false)
       }
@@ -105,7 +110,7 @@ export const AltaRutas = () => {
           setError(null)
         } catch (err) {
           console.error('Error al cargar choferes:', err)
-          setError('Error al cargar choferes. Por favor, intente nuevamente.')
+          setError('No se pudieron cargar los datos de choferes. Verifique su conexión e intente nuevamente.')
           setChoferes([])
         }
       }
@@ -271,22 +276,6 @@ export const AltaRutas = () => {
     }, 0)
   }
   
-  // Manejar clic en botón Salir
-  const handleSalir = () => {
-    setIsExitDialogOpen(true)
-  }
-  
-  // Manejar confirmación de salida
-  const handleConfirmExit = () => {
-    setIsExitDialogOpen(false)
-    navigate('/')
-  }
-  
-  // Manejar cancelación de salida
-  const handleCancelExit = () => {
-    setIsExitDialogOpen(false)
-  }
-  
   // Manejar tecla ESC
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -300,6 +289,22 @@ export const AltaRutas = () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
+  
+  // Manejar confirmación de salida
+  const handleConfirmExit = () => {
+    setIsExitDialogOpen(false)
+    navigate('/')
+  }
+  
+  // Manejar cancelación de salida
+  const handleCancelExit = () => {
+    setIsExitDialogOpen(false)
+  }
+  
+  // Manejar clic en botón Salir
+  const handleSalir = () => {
+    setIsExitDialogOpen(true)
+  }
   
   // Mostrar pantalla de carga
   if (loading) {
@@ -334,23 +339,84 @@ export const AltaRutas = () => {
               <Heading size="lg" textAlign="center">Alta de Rutas</Heading>
             </CardHeader>
             <CardBody>
-              <Center py={10}>
-                <VStack>
-                  <Icon viewBox="0 0 24 24" boxSize={12} color="red.500">
-                    <path
-                      fill="currentColor"
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-                    />
-                  </Icon>
-                  <Text color="red.500" fontSize="lg" fontWeight="medium" mt={2}>{error}</Text>
-                  <Button mt={6} colorScheme="blue" onClick={() => window.location.reload()}>
-                    Reintentar
-                  </Button>
-                </VStack>
-              </Center>
+              <Box 
+                p={5} 
+                bg={errorBg} 
+                color={errorTextColor} 
+                borderRadius="md" 
+                mb={6}
+                borderLeft="4px" 
+                borderColor={errorBorderColor}
+              >
+                <Flex direction="column" align="center" justify="center">
+                  <Icon as={CloseIcon} boxSize={10} mb={3} />
+                  <Text fontWeight="bold" fontSize="lg" mb={1} textAlign="center">
+                    Error de conexión
+                  </Text>
+                  <Text textAlign="center" mb={4}>{error}</Text>
+                  <HStack spacing={4} mt={2}>
+                    <Button 
+                      colorScheme="blue" 
+                      onClick={() => window.location.reload()}
+                      leftIcon={<RepeatIcon />}
+                      size="md"
+                      px={6}
+                      _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
+                      transition="all 0.2s"
+                    >
+                      Reintentar
+                    </Button>
+                    <Button 
+                      colorScheme="red" 
+                      onClick={handleSalir}
+                      variant="outline"
+                      size="md"
+                      px={6}
+                      _hover={{ transform: 'translateY(-2px)', boxShadow: 'sm' }}
+                      transition="all 0.2s"
+                    >
+                      Salir
+                    </Button>
+                  </HStack>
+                </Flex>
+              </Box>
             </CardBody>
           </Card>
         </Box>
+        
+        {/* Diálogo de confirmación de salida */}
+        <AlertDialog
+          isOpen={isExitDialogOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={handleCancelExit}
+          isCentered
+        >
+          <AlertDialogOverlay>
+            <AlertDialogContent borderRadius="md" boxShadow="xl" mx={4}>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px">
+                Confirmar salida
+              </AlertDialogHeader>
+
+              <AlertDialogBody py={4}>
+                ¿Está seguro que desea salir? Los datos no guardados se perderán.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={handleCancelExit} size="md">
+                  Cancelar
+                </Button>
+                <Button 
+                  colorScheme="red" 
+                  onClick={handleConfirmExit} 
+                  ml={3}
+                  size="md"
+                >
+                  Salir
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
       </Box>
     )
   }
@@ -517,7 +583,6 @@ export const AltaRutas = () => {
               <Button 
                 colorScheme="green" 
                 onClick={handleAceptar}
-                leftIcon={<span role="img" aria-label="check">✓</span>}
                 size={["md", "md"]}
                 px={[4, 5, 6]}
                 _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
@@ -530,7 +595,6 @@ export const AltaRutas = () => {
               <Button 
                 colorScheme="red" 
                 onClick={handleSalir}
-                leftIcon={<span role="img" aria-label="exit">✖</span>}
                 size={["md", "md"]}
                 px={[4, 5, 6]}
                 variant="outline"

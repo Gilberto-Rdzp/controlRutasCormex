@@ -522,7 +522,6 @@ export const BusquedaRutas = () => {
                     <Button 
                       colorScheme="red"
                       onClick={handleLimpiarFiltros}
-                      leftIcon={<CloseIcon />}
                       h="45px"
                       _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
                       transition="all 0.2s"
@@ -643,7 +642,6 @@ export const BusquedaRutas = () => {
             <Button 
                 colorScheme="red" 
                 onClick={handleSalir}
-                leftIcon={<span role="img" aria-label="exit">✖</span>}
                 size={["md", "md"]}
                 px={[4, 5, 6]}
                 variant="outline"
