@@ -33,9 +33,19 @@ import {
   Text,
   Center,
   Spinner,
-  HStack
+  HStack,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Divider,
+  TableContainer,
+  useColorModeValue,
+  InputGroup,
+  InputLeftElement,
+  Badge
 } from '@chakra-ui/react'
-import { EditIcon, DeleteIcon, CloseIcon } from '@chakra-ui/icons'
+import { EditIcon, DeleteIcon, CloseIcon, SearchIcon } from '@chakra-ui/icons'
 import { rutasApi, ciudadesApi, empleadosApi } from '../../services/api'
 import type { Ruta, Ciudad, Empleado } from '../../services/api'
 
@@ -72,6 +82,13 @@ export const BusquedaRutas = () => {
   const capacidadRef = useRef<HTMLInputElement>(null)
   const choferRef = useRef<HTMLSelectElement>(null)
   const tipoRef = useRef<HTMLSelectElement>(null)
+  
+  // Color mode values
+  const cardBg = useColorModeValue('white', 'gray.700')
+  const headerBg = useColorModeValue('blue.50', 'blue.900')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const tableBg = useColorModeValue('white', 'gray.800')
+  const hoverBg = useColorModeValue('gray.50', 'gray.700')
   
   const toast = useToast()
   
@@ -398,149 +415,265 @@ export const BusquedaRutas = () => {
   }
   
   return (
-    <Box p={8}>
-      <Heading mb={6}>Búsqueda de Rutas</Heading>
-      
-      {loading && !error && (
-        <Center my={10}>
-          <Spinner size="xl" />
-        </Center>
-      )}
-      
-      {error && (
-        <Box p={4} bg="red.100" borderRadius="md" mb={6}>
-          <Text color="red.600">{error}</Text>
-        </Box>
-      )}
-      
-      {!loading && !error && (
-        <>
-          {/* Filtros */}
-          <Flex mb={6} wrap="wrap" gap={4} align="flex-end">
-            <FormControl w={{ base: '100%', md: '250px' }}>
-              <FormLabel>Ciudad</FormLabel>
-              <Select 
-                placeholder="Seleccione"
-                value={ciudadSeleccionada}
-                onChange={handleCiudadChange}
+    <Box position="fixed" top="0" left="0" right="0" bottom="0" bg="gray.50" overflowY="auto" p={4}>
+      <Box py={4} w="100%" maxW="1200px" mx="auto">
+        <Card 
+          boxShadow="xl" 
+          borderRadius="lg" 
+          bg={cardBg} 
+          overflow="hidden"
+        >
+          <CardHeader bg={headerBg} borderTopRadius="lg" pb={4}>
+            <Heading size="lg" textAlign="center">Búsqueda de Rutas</Heading>
+          </CardHeader>
+          
+          <CardBody pt={6} px={6}>
+            {loading && !error && (
+              <Center my={10}>
+                <Spinner size="xl" thickness="4px" color="blue.500" />
+              </Center>
+            )}
+            
+            {error && (
+              <Box 
+                p={4} 
+                bg="red.50" 
+                color="red.600" 
+                borderRadius="md" 
+                mb={6}
+                borderLeft="4px" 
+                borderColor="red.500"
               >
-                {ciudades.map(ciudad => (
-                  <option key={ciudad.id} value={ciudad.id.toString()}>
-                    {ciudad.nombre}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
+                <Text fontWeight="medium">{error}</Text>
+              </Box>
+            )}
             
-            <FormControl w={{ base: '100%', md: '250px' }}>
-              <FormLabel>Ruta</FormLabel>
-              <Input 
-                placeholder="Filtrar por nombre"
-                value={filtroRuta}
-                onChange={handleFiltroRutaChange}
-                isDisabled={!ciudadSeleccionada}
-              />
-            </FormControl>
-            
+            {!loading && !error && (
+              <>
+                {/* Filtros */}
+                <Box mb={6} p={4} bg="blue.50" borderRadius="md" borderLeft="4px" borderColor="blue.400">
+                  <Text fontSize="lg" fontWeight="medium" mb={4} color="blue.700">
+                    Filtros de búsqueda
+                  </Text>
+                  <Flex wrap="wrap" gap={6} align="flex-end">
+                    <FormControl w={{ base: '100%', md: '250px' }}>
+                      <FormLabel fontWeight="medium">Ciudad</FormLabel>
+                      <Select 
+                        placeholder="Seleccione"
+                        value={ciudadSeleccionada}
+                        onChange={handleCiudadChange}
+                        bg="white"
+                        borderColor={borderColor}
+                        _hover={{ borderColor: 'blue.300' }}
+                        _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                        h="45px"
+                      >
+                        {ciudades.map(ciudad => (
+                          <option key={ciudad.id} value={ciudad.id.toString()}>
+                            {ciudad.nombre}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <FormControl w={{ base: '100%', md: '300px' }}>
+                      <FormLabel fontWeight="medium">Ruta</FormLabel>
+                      <InputGroup>
+                        <InputLeftElement pointerEvents="none">
+                          <SearchIcon color="gray.400" />
+                        </InputLeftElement>
+                        <Input 
+                          placeholder="Filtrar por nombre"
+                          value={filtroRuta}
+                          onChange={handleFiltroRutaChange}
+                          isDisabled={!ciudadSeleccionada}
+                          bg="white"
+                          borderColor={borderColor}
+                          _hover={{ borderColor: 'blue.300' }}
+                          _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                          h="45px"
+                        />
+                      </InputGroup>
+                    </FormControl>
+                    
+                    <Button 
+                      colorScheme="red"
+                      onClick={handleLimpiarFiltros}
+                      leftIcon={<CloseIcon />}
+                      h="45px"
+                      _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
+                      transition="all 0.2s"
+                    >
+                      Eliminar Filtros
+                    </Button>
+                  </Flex>
+                </Box>
+                
+                {/* Tabla de rutas */}
+                {ciudadSeleccionada ? (
+                  <>
+                    <Box mb={3}>
+                      <Text fontSize="lg" fontWeight="medium" color="gray.700">
+                        Resultados: {rutasFiltradas.length} {rutasFiltradas.length === 1 ? 'ruta encontrada' : 'rutas encontradas'}
+                      </Text>
+                      <Text color="gray.500" fontSize="sm">
+                        Seleccione una ruta para modificar o eliminar
+                      </Text>
+                    </Box>
+                    
+                    <TableContainer
+                      borderRadius="md"
+                      borderWidth="1px"
+                      borderColor={borderColor}
+                      boxShadow="sm"
+                      mb={4}
+                    >
+                      <Table variant="simple" bg={tableBg}>
+                        <Thead bg={headerBg}>
+                          <Tr>
+                            <Th>ID</Th>
+                            <Th>Nombre</Th>
+                            <Th>Tipo</Th>
+                            <Th>Capacidad</Th>
+                            <Th width="100px" textAlign="center">Modificar</Th>
+                            <Th width="100px" textAlign="center">Eliminar</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {rutasFiltradas.length > 0 ? (
+                            rutasFiltradas.map(ruta => (
+                              <Tr 
+                                key={ruta.id}
+                                _hover={{ bg: hoverBg }}
+                                transition="background 0.2s"
+                              >
+                                <Td fontWeight="medium">{ruta.id}</Td>
+                                <Td>{ruta.nombre}</Td>
+                                <Td>
+                                  <Badge 
+                                    colorScheme={ruta.tipo === 'Personal' ? 'green' : 'purple'}
+                                    py={1}
+                                    px={2}
+                                    borderRadius="md"
+                                  >
+                                    {ruta.tipo}
+                                  </Badge>
+                                </Td>
+                                <Td>{ruta.capacidad}</Td>
+                                <Td textAlign="center">
+                                  <IconButton
+                                    aria-label="Modificar ruta"
+                                    icon={<EditIcon />}
+                                    colorScheme="blue"
+                                    size="sm"
+                                    onClick={() => handleOpenEditModal(ruta)}
+                                    _hover={{ transform: 'scale(1.1)' }}
+                                    transition="all 0.2s"
+                                  />
+                                </Td>
+                                <Td textAlign="center">
+                                  <IconButton
+                                    aria-label="Eliminar ruta"
+                                    icon={<DeleteIcon />}
+                                    colorScheme="red"
+                                    size="sm"
+                                    onClick={() => handleOpenDeleteDialog(ruta)}
+                                    _hover={{ transform: 'scale(1.1)' }}
+                                    transition="all 0.2s"
+                                  />
+                                </Td>
+                              </Tr>
+                            ))
+                          ) : (
+                            <Tr>
+                              <Td colSpan={6} textAlign="center" py={6}>
+                                <Text color="gray.500">No se encontraron rutas</Text>
+                              </Td>
+                            </Tr>
+                          )}
+                        </Tbody>
+                      </Table>
+                    </TableContainer>
+                  </>
+                ) : (
+                  <Box 
+                    p={6} 
+                    bg="blue.50" 
+                    borderRadius="md" 
+                    textAlign="center"
+                    borderWidth="1px"
+                    borderColor="blue.200"
+                  >
+                    <Text fontSize="lg" color="blue.700">
+                      Seleccione una ciudad para ver las rutas
+                    </Text>
+                  </Box>
+                )}
+              </>
+            )}
+          </CardBody>
+          
+          <Divider borderColor={borderColor} />
+          
+          <CardFooter pt={4} px={6} pb={4}>
+            <HStack width="100%" justifyContent="flex-end">
             <Button 
-              colorScheme="red"
-              onClick={handleLimpiarFiltros}
-              leftIcon={<CloseIcon />}
-            >
-              Eliminar Filtros
-            </Button>
-          </Flex>
-          
-          {/* Tabla de rutas */}
-          {ciudadSeleccionada && (
-            <Box overflowX="auto">
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>ID</Th>
-                    <Th>Nombre</Th>
-                    <Th>Tipo</Th>
-                    <Th>Capacidad</Th>
-                    <Th>Modificar</Th>
-                    <Th>Eliminar</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {rutasFiltradas.length > 0 ? (
-                    rutasFiltradas.map(ruta => (
-                      <Tr key={ruta.id}>
-                        <Td>{ruta.id}</Td>
-                        <Td>{ruta.nombre}</Td>
-                        <Td>{ruta.tipo}</Td>
-                        <Td>{ruta.capacidad}</Td>
-                        <Td>
-                          <IconButton
-                            aria-label="Modificar ruta"
-                            icon={<EditIcon />}
-                            colorScheme="blue"
-                            size="sm"
-                            onClick={() => handleOpenEditModal(ruta)}
-                          />
-                        </Td>
-                        <Td>
-                          <IconButton
-                            aria-label="Eliminar ruta"
-                            icon={<DeleteIcon />}
-                            colorScheme="red"
-                            size="sm"
-                            onClick={() => handleOpenDeleteDialog(ruta)}
-                          />
-                        </Td>
-                      </Tr>
-                    ))
-                  ) : (
-                    <Tr>
-                      <Td colSpan={6} textAlign="center">
-                        No se encontraron rutas
-                      </Td>
-                    </Tr>
-                  )}
-                </Tbody>
-              </Table>
-            </Box>
-          )}
-          
-          {!ciudadSeleccionada && (
-            <Box p={4} bg="blue.50" borderRadius="md">
-              <Text align="center">Seleccione una ciudad para ver las rutas</Text>
-            </Box>
-          )}
-          
-          <HStack mt={6} justify="flex-end">
-            <Button colorScheme="red" onClick={handleSalir}>
-              Salir
-            </Button>
-          </HStack>
-        </>
-      )}
+                colorScheme="red" 
+                onClick={handleSalir}
+                leftIcon={<span role="img" aria-label="exit">✖</span>}
+                size={["md", "md"]}
+                px={[4, 5, 6]}
+                variant="outline"
+                _hover={{ transform: 'translateY(-2px)', boxShadow: 'sm' }}
+                transition="all 0.2s"
+                flexGrow={1}
+                maxW="160px"
+              >
+                Salir
+              </Button>
+            </HStack>
+          </CardFooter>
+        </Card>
+      </Box>
       
       {/* Diálogo de confirmación de eliminación */}
       <AlertDialog
         isOpen={isDeleteDialogOpen}
         leastDestructiveRef={cancelDeleteRef}
         onClose={handleCancelDelete}
+        isCentered
       >
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Eliminar Ruta
+        <AlertDialogOverlay backdropFilter="blur(2px)">
+          <AlertDialogContent borderRadius="xl" boxShadow="2xl" mx={4}>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" pb={4}>
+              <Flex align="center">
+                <DeleteIcon mr={2} />
+                Eliminar Ruta
+              </Flex>
             </AlertDialogHeader>
             
-            <AlertDialogBody>
-              ¿Está seguro que desea eliminar la ruta "{rutaAEliminar?.nombre}"?
-              Esta acción no se puede deshacer.
+            <AlertDialogBody pt={5}>
+              <Text mb={2}>¿Está seguro que desea eliminar la ruta:</Text>
+              <Text fontWeight="bold" mb={4} fontSize="lg">{rutaAEliminar?.nombre}</Text>
+              <Text color="red.600">Esta acción no se puede deshacer.</Text>
             </AlertDialogBody>
             
-            <AlertDialogFooter>
-              <Button ref={cancelDeleteRef} onClick={handleCancelDelete}>
+            <AlertDialogFooter py={4}>
+              <Button 
+                ref={cancelDeleteRef} 
+                onClick={handleCancelDelete}
+                size="md"
+                variant="outline"
+              >
                 Cancelar
               </Button>
-              <Button colorScheme="red" onClick={handleConfirmDelete} ml={3}>
+              <Button 
+                colorScheme="red" 
+                onClick={handleConfirmDelete} 
+                ml={3}
+                size="md"
+                leftIcon={<DeleteIcon />}
+              >
                 Eliminar
               </Button>
             </AlertDialogFooter>
@@ -549,35 +682,69 @@ export const BusquedaRutas = () => {
       </AlertDialog>
       
       {/* Modal de edición */}
-      <Modal isOpen={isEditModalOpen} onClose={handleCancelEdit} size="lg">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Modificar Ruta</ModalHeader>
+      <Modal 
+        isOpen={isEditModalOpen} 
+        onClose={handleCancelEdit} 
+        size="lg"
+        isCentered
+      >
+        <ModalOverlay backdropFilter="blur(2px)" />
+        <ModalContent borderRadius="xl" boxShadow="2xl">
+          <ModalHeader bg={headerBg} borderTopRadius="xl" pb={4}>
+            <Flex align="center">
+              <EditIcon mr={2} />
+              Modificar Ruta
+            </Flex>
+          </ModalHeader>
           <ModalCloseButton />
           
-          <ModalBody pb={6}>
+          <ModalBody pb={6} pt={6}>
             {formError && (
-              <Box p={3} bg="red.100" borderRadius="md" mb={4}>
-                <Text color="red.600">{formError}</Text>
+              <Box 
+                p={3} 
+                bg="red.50" 
+                borderRadius="md" 
+                mb={4}
+                borderLeft="4px" 
+                borderColor="red.500"
+              >
+                <Text color="red.600" fontWeight="medium">{formError}</Text>
               </Box>
             )}
             
-            <FormControl mb={4} isDisabled>
-              <FormLabel>Ciudad</FormLabel>
-              <Input value={rutaEnEdicion?.nombre_ciudad || ''} readOnly />
+            <FormControl mb={5} isDisabled>
+              <FormLabel fontWeight="medium">Ciudad</FormLabel>
+              <Input 
+                value={rutaEnEdicion?.nombre_ciudad || ''} 
+                readOnly 
+                bg="gray.50"
+                borderColor={borderColor}
+                h="45px"
+              />
             </FormControl>
             
-            <FormControl mb={4} isDisabled>
-              <FormLabel>Nombre de Ruta</FormLabel>
-              <Input value={rutaEnEdicion?.nombre || ''} readOnly />
+            <FormControl mb={5} isDisabled>
+              <FormLabel fontWeight="medium">Nombre de Ruta</FormLabel>
+              <Input 
+                value={rutaEnEdicion?.nombre || ''} 
+                readOnly 
+                bg="gray.50"
+                borderColor={borderColor}
+                h="45px"
+              />
             </FormControl>
             
-            <FormControl mb={4} isRequired>
-              <FormLabel>Tipo</FormLabel>
+            <FormControl mb={5} isRequired>
+              <FormLabel fontWeight="medium">Tipo</FormLabel>
               <Select
                 ref={tipoRef}
                 value={tipoEdit}
                 onChange={handleTipoEditChange}
+                bg="white"
+                borderColor={borderColor}
+                _hover={{ borderColor: 'blue.300' }}
+                _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                h="45px"
               >
                 <option value="">Seleccione</option>
                 {tiposServicio.map(tipo => (
@@ -588,12 +755,17 @@ export const BusquedaRutas = () => {
               </Select>
             </FormControl>
             
-            <FormControl mb={4} isRequired>
-              <FormLabel>Chofer</FormLabel>
+            <FormControl mb={5} isRequired>
+              <FormLabel fontWeight="medium">Chofer</FormLabel>
               <Select
                 ref={choferRef}
                 value={choferEdit}
                 onChange={(e) => setChoferEdit(e.target.value)}
+                bg="white"
+                borderColor={borderColor}
+                _hover={{ borderColor: 'blue.300' }}
+                _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                h="45px"
               >
                 <option value="">Seleccione</option>
                 {choferes.map(chofer => (
@@ -605,24 +777,46 @@ export const BusquedaRutas = () => {
             </FormControl>
             
             <FormControl mb={4} isRequired isInvalid={!!capacidadError}>
-              <FormLabel>Capacidad</FormLabel>
+              <FormLabel fontWeight="medium">Capacidad</FormLabel>
               <Input
                 ref={capacidadRef}
                 type="number"
                 value={capacidadEdit}
                 onChange={handleCapacidadEditChange}
+                bg="white"
+                borderColor={borderColor}
+                _hover={{ borderColor: 'blue.300' }}
+                _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
+                h="45px"
               />
               {capacidadError && (
                 <FormErrorMessage>{capacidadError}</FormErrorMessage>
               )}
+              {tipoEdit && (
+                <Text fontSize="sm" color="blue.600" mt={1}>
+                  Capacidad máxima: {getCapacidadMaxima(tipoEdit)}
+                </Text>
+              )}
             </FormControl>
           </ModalBody>
           
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleConfirmEdit}>
+          <ModalFooter bg="gray.50" borderBottomRadius="xl">
+            <Button 
+              colorScheme="blue" 
+              mr={3} 
+              onClick={handleConfirmEdit}
+              leftIcon={<span role="img" aria-label="check">✓</span>}
+              _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
+              transition="all 0.2s"
+            >
               Aceptar
             </Button>
-            <Button onClick={handleCancelEdit}>Cancelar</Button>
+            <Button 
+              onClick={handleCancelEdit}
+              variant="outline"
+            >
+              Cancelar
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -632,22 +826,28 @@ export const BusquedaRutas = () => {
         isOpen={isExitDialogOpen}
         leastDestructiveRef={cancelExitRef}
         onClose={handleCancelExit}
+        isCentered
       >
         <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Salir
+          <AlertDialogContent borderRadius="md" boxShadow="xl" mx={4}>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px">
+              Confirmar salida
             </AlertDialogHeader>
-            
-            <AlertDialogBody>
-              ¿Está seguro que desea salir? Los cambios no guardados se perderán.
+
+            <AlertDialogBody py={4}>
+              ¿Está seguro que desea salir? Los datos no guardados se perderán.
             </AlertDialogBody>
-            
+
             <AlertDialogFooter>
-              <Button ref={cancelExitRef} onClick={handleCancelExit}>
+              <Button ref={cancelExitRef} onClick={handleCancelExit} size="md">
                 Cancelar
               </Button>
-              <Button colorScheme="red" onClick={handleConfirmExit} ml={3}>
+              <Button 
+                colorScheme="red" 
+                onClick={handleConfirmExit} 
+                ml={3}
+                size="md"
+              >
                 Salir
               </Button>
             </AlertDialogFooter>
