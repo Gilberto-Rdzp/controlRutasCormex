@@ -2,6 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./config/db.config');
 
+// Importar rutas
+const ciudadesRoutes = require('./routes/ciudadesRoutes');
+const empleadosRoutes = require('./routes/empleadosRoutes');
+const rutasRoutes = require('./routes/rutasRoutes');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -27,6 +32,11 @@ app.get('/api/test-db', async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
+
+// API Routes
+app.use('/api/ciudades', ciudadesRoutes);
+app.use('/api/empleados', empleadosRoutes);
+app.use('/api/rutas', rutasRoutes);
 
 // Start the server
 app.listen(PORT, () => {
