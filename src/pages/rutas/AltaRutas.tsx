@@ -72,7 +72,8 @@ export const AltaRutas = () => {
   
   // Color mode values
   const cardBg = useColorModeValue('white', 'gray.700')
-  const headerBg = useColorModeValue('blue.50', 'blue.900')
+  const headerBg = useColorModeValue('blue.100', 'blue.800')
+  const headerColor = useColorModeValue('blue.800', 'white')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const errorBg = useColorModeValue('red.50', 'red.900')
   const errorBorderColor = useColorModeValue('red.500', 'red.600')
@@ -309,11 +310,11 @@ export const AltaRutas = () => {
   // Mostrar pantalla de carga
   if (loading) {
     return (
-      <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="center" justifyContent="center" bg="gray.50" overflowY="auto">
-        <Box py={8}>
+      <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="flex-start" justifyContent="center" bg="gray.50" overflowY="auto" pt={4}>
+        <Box py={2} mt={2}>
           <Card w={["95%", "90%", "450px"]} maxW="500px" boxShadow="xl" borderRadius="lg" mx="auto">
-            <CardHeader bg={headerBg} borderTopRadius="lg">
-              <Heading size="lg" textAlign="center">Alta de Rutas</Heading>
+            <CardHeader bg={headerBg} borderTopRadius="lg" position="sticky" top="0" zIndex="1" boxShadow="sm">
+              <Heading size="lg" textAlign="center" color={headerColor} fontWeight="bold">Alta de Rutas</Heading>
             </CardHeader>
             <CardBody>
               <Center py={10}>
@@ -332,11 +333,11 @@ export const AltaRutas = () => {
   // Mostrar mensaje de error
   if (error) {
     return (
-      <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="center" justifyContent="center" bg="gray.50" overflowY="auto">
-        <Box py={8}>
+      <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="flex-start" justifyContent="center" bg="gray.50" overflowY="auto" pt={4}>
+        <Box py={2} mt={2}>
           <Card w={["95%", "90%", "450px"]} maxW="500px" boxShadow="xl" borderRadius="lg" mx="auto">
-            <CardHeader bg={headerBg} borderTopRadius="lg">
-              <Heading size="lg" textAlign="center">Alta de Rutas</Heading>
+            <CardHeader bg={headerBg} borderTopRadius="lg" position="sticky" top="0" zIndex="1" boxShadow="sm">
+              <Heading size="lg" textAlign="center" color={headerColor} fontWeight="bold">Alta de Rutas</Heading>
             </CardHeader>
             <CardBody>
               <Box 
@@ -422,8 +423,8 @@ export const AltaRutas = () => {
   }
   
   return (
-    <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="center" justifyContent="center" bg="gray.50" overflowY="auto">
-      <Box py={8} w="100%" display="flex" justifyContent="center">
+    <Box position="fixed" top="0" left="0" right="0" bottom="0" display="flex" alignItems="flex-start" justifyContent="center" bg="gray.50" overflowY="auto" pt={4}>
+      <Box py={2} mt={2} w="100%" display="flex" justifyContent="center">
         <Card 
           w={["95%", "90%", "450px"]} 
           maxW="500px" 
@@ -433,11 +434,11 @@ export const AltaRutas = () => {
           mx="auto"
           overflow="hidden"
         >
-          <CardHeader bg={headerBg} borderTopRadius="lg" pb={4} textAlign="center">
-            <Heading size={["md", "lg"]} textAlign="center">Alta de Rutas</Heading>
+          <CardHeader bg={headerBg} borderTopRadius="lg" position="sticky" top="0" zIndex="1" boxShadow="sm">
+            <Heading size="lg" textAlign="center" color={headerColor} fontWeight="bold">Alta de Rutas</Heading>
           </CardHeader>
           
-          <CardBody pt={6} px={[4, 5, 6]}>
+          <CardBody pt={4} px={[4, 5, 6]} maxH="65vh" overflowY="auto">
             <VStack spacing={5} align="stretch">
               {formError && (
                 <Box 
