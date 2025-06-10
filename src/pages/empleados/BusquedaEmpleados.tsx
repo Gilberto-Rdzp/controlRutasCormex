@@ -792,39 +792,31 @@ export const BusquedaEmpleados = () => {
         onClose={handleCancelExit}
         isCentered
       >
-        <AlertDialogOverlay backdropFilter="blur(2px)">
-          <AlertDialogContent borderRadius="xl" boxShadow="2xl" mx={4}>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" pb={4}>
-              <Flex align="center">
-                <CloseIcon mr={2} />
-                Confirmar Salida
-              </Flex>
-            </AlertDialogHeader>
-            
-            <AlertDialogBody py={5}>
-              <Text>¿Está seguro que desea salir de esta pantalla?</Text>
-            </AlertDialogBody>
-            
-            <AlertDialogFooter py={4}>
-              <Button 
-                ref={cancelExitRef} 
-                onClick={handleCancelExit}
-                size="md"
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                colorScheme="blue" 
-                onClick={handleConfirmExit} 
-                ml={3}
-                size="md"
-              >
-                Aceptar
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
+        <AlertDialogOverlay>
+            <AlertDialogContent borderRadius="md" boxShadow="xl" mx={4}>
+              <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px">
+                Confirmar salida
+              </AlertDialogHeader>
+
+              <AlertDialogBody py={4}>
+                ¿Está seguro que desea salir? Los datos no guardados se perderán.
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelExitRef} onClick={handleCancelExit} size="md">
+                  Cancelar
+                </Button>
+                <Button 
+                  colorScheme="red" 
+                  onClick={handleConfirmExit} 
+                  ml={3}
+                  size="md"
+                >
+                  Salir
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
       </AlertDialog>
       
       {/* Modal de edición */}
