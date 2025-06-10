@@ -6,6 +6,7 @@ const db = require('./config/db.config');
 const ciudadesRoutes = require('./routes/ciudadesRoutes');
 const empleadosRoutes = require('./routes/empleadosRoutes');
 const rutasRoutes = require('./routes/rutasRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +35,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/ciudades', ciudadesRoutes);
 app.use('/api/empleados', empleadosRoutes);
 app.use('/api/rutas', rutasRoutes);
