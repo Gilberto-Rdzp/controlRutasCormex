@@ -303,10 +303,22 @@ export const BusquedaEmpleados = () => {
     setSueldoError('')
   }
   
+  // Formatear fecha para input type="date" (YYYY-MM-DD)
+  const formatearFechaParaInput = (fechaString: string): string => {
+    try {
+      const fecha = new Date(fechaString)
+      return fecha.toISOString().split('T')[0]
+    } catch (error) {
+      console.error('Error al formatear fecha:', error)
+      return ''
+    }
+  }
+
   // Abrir modal de edición
   const handleOpenEditModal = (empleado: Empleado) => {
     setEmpleadoEnEdicion(empleado)
-    setFechaNacimientoEdit(empleado.fecha_nacimiento)
+    // Formatear fecha para que sea compatible con el input type="date"
+    setFechaNacimientoEdit(formatearFechaParaInput(empleado.fecha_nacimiento))
     // Asegurarnos de que sueldo sea un número antes de convertirlo a string
     const sueldoValue = typeof empleado.sueldo === 'number' 
       ? empleado.sueldo.toString() 
@@ -516,6 +528,21 @@ export const BusquedaEmpleados = () => {
                         _hover={{ borderColor: 'blue.300' }}
                         _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
                         h="45px"
+                        css={{
+                          "&::-webkit-scrollbar": {
+                            width: "8px",
+                          },
+                          "&::-webkit-scrollbar-track": {
+                            background: "#f1f1f1",
+                          },
+                          "&::-webkit-scrollbar-thumb": {
+                            background: "#888",
+                            borderRadius: "4px",
+                          },
+                          "&::-webkit-scrollbar-thumb:hover": {
+                            background: "#555",
+                          }
+                        }}
                       >
                         {ciudades.map(ciudad => (
                           <option key={ciudad.id} value={ciudad.id.toString()}>
@@ -887,6 +914,8 @@ export const BusquedaEmpleados = () => {
                 _hover={{ borderColor: 'blue.300' }}
                 _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
                 h="45px"
+                max={new Date().toISOString().split('T')[0]}
+                onClick={(e) => (e.target as HTMLInputElement).showPicker()}
               />
               {fechaError && (
                 <FormErrorMessage>{fechaError}</FormErrorMessage>
@@ -913,272 +942,10 @@ export const BusquedaEmpleados = () => {
                   _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
                   h="45px"
                   pl={8}
-                />
-              </InputGroup>
-              {sueldoError && (
-                <FormErrorMessage>{sueldoError}</FormErrorMessage>
-              )}
-            </FormControl>
-          </ModalBody>
-          
-          <ModalFooter bg="gray.50" borderBottomRadius="xl" pt={4}>
-            <Button 
-              onClick={handleCancelEdit}
-              variant="outline"
-              mr={3}
-              size="md"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              colorScheme="blue" 
-              onClick={handleConfirmEdit}
-              size="md"
-              leftIcon={<EditIcon />}
-              isDisabled={!!fechaError || !!sueldoError}
-            >
-              Actualizar
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      {/* Diálogo de confirmación de eliminación */}
-      <AlertDialog
-        isOpen={isDeleteDialogOpen}
-        leastDestructiveRef={cancelDeleteRef}
-        onClose={handleCancelDelete}
-        isCentered
-      >
-        <AlertDialogOverlay backdropFilter="blur(2px)">
-          <AlertDialogContent borderRadius="xl" boxShadow="2xl" mx={4}>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" pb={4}>
-              <Flex align="center">
-                <DeleteIcon mr={2} />
-                Eliminar Empleado
-              </Flex>
-            </AlertDialogHeader>
-            
-            <AlertDialogBody pt={5}>
-              {tieneRutasAsignadas ? (
-                <>
-                  <Text mb={2} color="red.600" fontWeight="bold">
-                    No es posible eliminar al empleado:
-                  </Text>
-                  <Text fontWeight="bold" mb={4} fontSize="lg">
-                    {empleadoAEliminar?.nombre} {empleadoAEliminar?.apellido_paterno} {empleadoAEliminar?.apellido_materno}
-                  </Text>
-                  <Text mb={4}>
-                    El empleado tiene las siguientes rutas asignadas:
-                  </Text>
-                  <Box 
-                    p={3} 
-                    borderWidth="1px" 
-                    borderRadius="md" 
-                    borderColor="red.200" 
-                    bg="red.50"
-                    mb={4}
-                  >
-                    {rutasAsignadas.map(ruta => (
-                      <Text key={ruta.id} py={1} borderBottomWidth={rutasAsignadas.indexOf(ruta) !== rutasAsignadas.length - 1 ? "1px" : "0"}>
-                        {ruta.nombre} ({ruta.nombre_ciudad})
-                      </Text>
-                    ))}
-                  </Box>
-                  <Text color="red.600">
-                    Debe reasignar estas rutas a otros empleados antes de poder eliminar a este empleado.
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Text mb={2}>¿Está seguro que desea eliminar al empleado:</Text>
-                  <Text fontWeight="bold" mb={4} fontSize="lg">
-                    {empleadoAEliminar?.nombre} {empleadoAEliminar?.apellido_paterno} {empleadoAEliminar?.apellido_materno}
-                  </Text>
-                  <Text color="red.600">Esta acción no se puede deshacer.</Text>
-                </>
-              )}
-            </AlertDialogBody>
-            
-            <AlertDialogFooter py={4}>
-              <Button 
-                ref={cancelDeleteRef} 
-                onClick={handleCancelDelete}
-                size="md"
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-              {!tieneRutasAsignadas && (
-                <Button 
-                  colorScheme="red" 
-                  onClick={handleConfirmDelete} 
-                  ml={3}
-                  size="md"
-                  leftIcon={<DeleteIcon />}
-                >
-                  Eliminar
-                </Button>
-              )}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-      
-      {/* Diálogo de confirmación de salida */}
-      <AlertDialog
-        isOpen={isExitDialogOpen}
-        leastDestructiveRef={cancelExitRef}
-        onClose={handleCancelExit}
-        isCentered
-      >
-        <AlertDialogOverlay backdropFilter="blur(2px)">
-          <AlertDialogContent borderRadius="xl" boxShadow="2xl" mx={4}>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold" borderBottomWidth="1px" pb={4}>
-              <Flex align="center">
-                <CloseIcon mr={2} />
-                Confirmar Salida
-              </Flex>
-            </AlertDialogHeader>
-            
-            <AlertDialogBody py={5}>
-              <Text>¿Está seguro que desea salir de esta pantalla?</Text>
-            </AlertDialogBody>
-            
-            <AlertDialogFooter py={4}>
-              <Button 
-                ref={cancelExitRef} 
-                onClick={handleCancelExit}
-                size="md"
-                variant="outline"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                colorScheme="blue" 
-                onClick={handleConfirmExit} 
-                ml={3}
-                size="md"
-              >
-                Aceptar
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-      
-      {/* Modal de edición */}
-      <Modal 
-        isOpen={isEditModalOpen} 
-        onClose={handleCancelEdit} 
-        size="lg"
-        isCentered
-      >
-        <ModalOverlay backdropFilter="blur(2px)" />
-        <ModalContent borderRadius="xl" boxShadow="2xl">
-          <ModalHeader bg={headerBg} borderTopRadius="xl" pb={4}>
-            <Flex align="center">
-              <EditIcon mr={2} />
-              Modificar Empleado
-            </Flex>
-          </ModalHeader>
-          <ModalCloseButton />
-          
-          <ModalBody pb={6} pt={6}>
-            {formError && (
-              <Box 
-                p={3} 
-                bg="red.50" 
-                borderRadius="md" 
-                mb={4}
-                borderLeft="4px" 
-                borderColor="red.500"
-              >
-                <Text color="red.600" fontWeight="medium">{formError}</Text>
-              </Box>
-            )}
-            
-            <FormControl mb={5} isDisabled>
-              <FormLabel fontWeight="medium">Ciudad</FormLabel>
-              <Input 
-                value={empleadoEnEdicion?.nombre_ciudad || ''} 
-                readOnly 
-                bg="gray.50"
-                borderColor={borderColor}
-                h="45px"
-              />
-            </FormControl>
-            
-            <FormControl mb={5} isDisabled>
-              <FormLabel fontWeight="medium">Nombre</FormLabel>
-              <Input 
-                value={empleadoEnEdicion?.nombre || ''} 
-                readOnly 
-                bg="gray.50"
-                borderColor={borderColor}
-                h="45px"
-              />
-            </FormControl>
-            
-            <FormControl mb={5} isDisabled>
-              <FormLabel fontWeight="medium">Apellido Paterno</FormLabel>
-              <Input 
-                value={empleadoEnEdicion?.apellido_paterno || ''} 
-                readOnly 
-                bg="gray.50"
-                borderColor={borderColor}
-                h="45px"
-              />
-            </FormControl>
-            
-            <FormControl mb={5} isDisabled>
-              <FormLabel fontWeight="medium">Apellido Materno</FormLabel>
-              <Input 
-                value={empleadoEnEdicion?.apellido_materno || ''} 
-                readOnly 
-                bg="gray.50"
-                borderColor={borderColor}
-                h="45px"
-              />
-            </FormControl>
-            
-            <FormControl mb={5} isInvalid={!!fechaError}>
-              <FormLabel fontWeight="medium">Fecha de Nacimiento</FormLabel>
-              <Input 
-                type="date"
-                ref={fechaNacimientoRef}
-                value={fechaNacimientoEdit} 
-                onChange={handleFechaNacimientoEditChange}
-                bg="white"
-                borderColor={borderColor}
-                _hover={{ borderColor: 'blue.300' }}
-                _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
-                h="45px"
-              />
-              {fechaError && (
-                <FormErrorMessage>{fechaError}</FormErrorMessage>
-              )}
-            </FormControl>
-            
-            <FormControl isInvalid={!!sueldoError}>
-              <FormLabel fontWeight="medium">Sueldo</FormLabel>
-              <InputGroup>
-                <InputLeftElement
-                  pointerEvents='none'
-                  color='gray.500'
-                  fontSize='1.2em'
-                  children='$'
-                />
-                <Input 
-                  type="number"
-                  ref={sueldoRef}
-                  value={sueldoEdit} 
-                  onChange={handleSueldoEditChange}
-                  bg="white"
-                  borderColor={borderColor}
-                  _hover={{ borderColor: 'blue.300' }}
-                  _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px blue.400' }}
-                  h="45px"
-                  pl={8}
+                  step="0.01"
+                  min="0"
+                  step="0.01"
+                  min="0"
                 />
               </InputGroup>
               {sueldoError && (
