@@ -13,15 +13,52 @@ import {
   MenuItem,
   useBreakpointValue,
   Icon,
-  Stack
+  Stack,
+  useToast
 } from '@chakra-ui/react'
 import { useNavigate } from 'react-router-dom'
 import { FiUser, FiTruck, FiSearch, FiUserPlus } from 'react-icons/fi'
+import { useEffect, useState } from 'react'
 
 const Navbar = () => {
+  const navigate = useNavigate()
+  const toast = useToast()
+  const [userName, setUserName] = useState('Usuario')
   const fontSize = useBreakpointValue({ base: "lg", md: "2xl" })
   const padding = useBreakpointValue({ base: 4, md: 8 })
   const avatarSize = useBreakpointValue({ base: "sm", md: "md" })
+
+  useEffect(() => {
+    // Obtener datos del usuario del localStorage
+    const usuarioData = localStorage.getItem('usuario')
+    if (usuarioData) {
+      try {
+        const usuario = JSON.parse(usuarioData)
+        // Usar el nombre del usuario si está disponible, o el correo como alternativa
+        setUserName(usuario.nombre || usuario.correo || 'Usuario')
+      } catch (error) {
+        console.error('Error al parsear datos del usuario:', error)
+      }
+    }
+  }, [])
+
+  const handleLogout = () => {
+    // Eliminar token y datos de usuario del localStorage
+    localStorage.removeItem('token')
+    localStorage.removeItem('usuario')
+    
+    // Mostrar mensaje de éxito
+    toast({
+      title: 'Sesión cerrada',
+      description: 'Has cerrado sesión correctamente',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    })
+    
+    // Redireccionar al login
+    navigate('/')
+  }
 
   return (
     <Box bg="white" boxShadow="sm" width="100%">
@@ -37,12 +74,15 @@ const Navbar = () => {
         </Text>
         <Menu>
           <MenuButton>
-            <Avatar size={avatarSize} name="Gilberto" bg="blue.500" />
+            <Flex align="center" gap={2}>
+              <Text fontSize="sm" display={{ base: 'none', md: 'block' }}>
+                {userName}
+              </Text>
+              <Avatar size={avatarSize} name={userName} bg="blue.500" />
+            </Flex>
           </MenuButton>
           <MenuList>
-            <MenuItem>Perfil</MenuItem>
-            <MenuItem>Configuración</MenuItem>
-            <MenuItem>Cerrar Sesión</MenuItem>
+            <MenuItem onClick={handleLogout}>Cerrar Sesión</MenuItem>
           </MenuList>
         </Menu>
       </Flex>
@@ -62,6 +102,14 @@ export const Home = () => {
   const buttonStackSpacing = useBreakpointValue({ base: 1, md: 2 })
   const titleFontSize = useBreakpointValue({ base: "md", md: "xl" })
   const descFontSize = useBreakpointValue({ base: "xs", md: "sm" })
+
+  // Verificar si el usuario está autenticado
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/')
+    }
+  }, [navigate])
 
   const menuItems = [
     {
