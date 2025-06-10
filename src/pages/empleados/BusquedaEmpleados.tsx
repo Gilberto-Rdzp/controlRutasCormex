@@ -944,8 +944,6 @@ export const BusquedaEmpleados = () => {
                   pl={8}
                   step="0.01"
                   min="0"
-                  step="0.01"
-                  min="0"
                 />
               </InputGroup>
               {sueldoError && (
