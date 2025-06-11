@@ -628,7 +628,7 @@ export const BusquedaEmpleados = () => {
                                 <Td>{empleado.nombre}</Td>
                                 <Td>{empleado.apellido_paterno}</Td>
                                 <Td>{empleado.apellido_materno}</Td>
-                                <Td>{new Date(empleado.fecha_nacimiento).toLocaleDateString()}</Td>
+                                <Td>{new Date(empleado.fecha_nacimiento).toLocaleDateString('es-MX')}</Td>
                                 <Td>${typeof empleado.sueldo === 'number' ? empleado.sueldo.toFixed(2) : empleado.sueldo}</Td>
                                 <Td textAlign="center">
                                   <IconButton
